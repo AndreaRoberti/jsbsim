@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<s_function_config>
+    <input>
+        <property> fcs/throttle-cmd-norm[0] </property>
+    </input>
+    <outputs>
+        <output name="State">
+            <property> velocities/u-fps </property>
+            <property> velocities/v-fps </property>
+            <property> velocities/w-fps </property>
+            <property> velocities/p-rad_sec </property>
+            <property> velocities/q-rad_sec </property>
+            <property> velocities/r-rad_sec </property>
+            <property> position/h-sl-ft </property>
+            <property> position/long-gc-deg </property>
+            <property> position/lat-gc-deg </property>
+            <property> attitude/phi-rad </property>
+            <property> attitude/theta-rad </property>
+            <property> attitude/psi-rad </property>
+        </output>
+        <output name="ToFlightGear">
+            <property> position/long-gc-deg </property>
+            <property> position/lat-gc-deg </property>
+            <property> position/h-sl-ft </property>
+            <property> attitude/phi-rad </property>
+            <property> attitude/theta-rad </property>
+            <property> attitude/psi-rad </property>
+        </output>
+    </outputs>
+    <!--
+        longitude, latitude, altitude, 
+        roll, pitch, and yaw respectively
+        
+        This is an optional parameter-->
+    <!--The only properties in this should be atmosphere related-->
+    <!--
+    <weather>
+        <property> atmosphere/wind-north-fps </property>
+    </weather>
+    -->
+</s_function_config>

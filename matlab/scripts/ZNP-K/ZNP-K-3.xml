@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<runscript name="ZNK-K-3 free flight test">
+ <!--
+   This run is for testing free flight of a lighter-than-air aircraft.
+
+   If you visualize it in FlightGear start with -lat=37 -lon=-122.
+ -->
+
+ <use aircraft="ZNP-K" initialize="reset01"/>
+ <run start="0.0" end="480.1" dt="0.004166666667">
+
+  <property value="0">simulation/course-time-trigger</property>
+  <property value="0">simulation/notify-time-trigger</property>
+
+  <event name="Initialize 1">
+   <description>Configure the aircraft</description>
+   <condition>
+    simulation/sim-time-sec GT 0.0
+   </condition>
+   <notify>
+    <property>static-condition/net-lift-lbs</property>
+    <property>inertia/cg-x-in</property>
+    <property>mooring/moored</property>
+    <property>position/vrp-latitude-deg</property>
+    <property>position/vrp-longitude-deg</property>
+    <property>position/vrp-altitude-ft</property>
+   </notify>
+   <!-- Mooring mast position. -->
+   <set name="mooring/latitude-deg" value="37.00"/>
+   <set name="mooring/longitude-deg" value="-122.00"/>
+   <set name="mooring/altitude-ft" value="45.0"/>
+   <!-- Weigh-off. -->
+   <set name="inertia/pointmass-weight-lbs[0]" value="1000.0"/>
+   <!-- Set elevator. -->
+   <set name="fcs/elevator-cmd-norm" value="0.1"/>   
+    <set name="fcs/rudder-cmd-norm" value="0.0"/>
+   <!-- Fill the forward ballonet. -->
+   <set name="fcs/ballonet-damper-cmd-norm[0]" value="1.0"/>
+   <set name="fcs/ballonet-valve-cmd-norm[1]" value="0.8"/>
+  </event>
+
+  <event name="Initialize 2">
+   <description>Configure the aircraft 2</description>
+   <condition>
+    simulation/sim-time-sec GT 1.0
+   </condition>
+   <notify>
+    <property>static-condition/net-lift-lbs</property>
+    <property>inertia/cg-x-in</property>
+    <property>mooring/moored</property>
+    <property>mooring/total-distance-ft</property>
+    <property>position/vrp-latitude-deg</property>
+    <property>position/vrp-longitude-deg</property>
+    <property>position/vrp-altitude-ft</property>
+   </notify>
+   <!-- Connect the mooring. -->
+   <!-- set name="mooring/wire-connected" value="1.0"/ -->
+  </event>
+
+  <event name="Engine start 1">
+   <description>Start the engines</description>
+   <condition>
+    simulation/sim-time-sec GE 2.0
+   </condition>
+   <notify/>
+   <set name="fcs/throttle-cmd-norm[0]" value="1.0"/>
+   <set name="fcs/mixture-cmd-norm[0]"  value="1.0"/>
+   <set name="fcs/throttle-cmd-norm[1]" value="1.0"/>
+   <set name="fcs/mixture-cmd-norm[1]"  value="1.0"/>
+   <set name="propulsion/magneto_cmd"   value="3"/>
+   <set name="propulsion/starter_cmd"   value="1"/>
+   <set name="ap/yaw-damper-active"    value="1.0"/>
+  </event>
+
+  <event name="Engine start 2">
+   <description>The engines have started</description>
+   <condition>
+    propulsion/engine[0]/engine-rpm GE 600
+   </condition>
+   <notify>
+    <property>propulsion/engine[0]/engine-rpm</property>
+    <property>propulsion/engine[1]/engine-rpm</property>
+    <property>propulsion/engine[0]/power-hp</property>
+    <property>propulsion/engine[1]/power-hp</property>
+   </notify>
+   <set name="propulsion/starter_cmd"   value="0"/>
+   <set name="fcs/throttle-cmd-norm[0]" value="0.6"/>
+   <set name="fcs/throttle-cmd-norm[1]" value="0.6"/>
+  </event>
+
+
+ <!--
+  <event name="Test Rudder">
+    <condition>
+      simulation/sim-time-sec GE 10.0
+    </condition>
+    <notify>
+      <property>fcs/rudder-pos-norm</property>
+      <property>attitude/psi-deg</property>
+    </notify>
+    <set name="fcs/rudder-cmd-norm" value="0.1"/> 
+  </event>
+-->
+
+  <event name="Stay at fixed altitude 1">
+   <notify>
+    <property>fcs/ballonet-damper-cmd-norm[0]</property>
+    <property>fcs/ballonet-damper-cmd-norm[1]</property>
+    <property>fcs/ballonet-valve-cmd-norm[0]</property>
+    <property>fcs/ballonet-valve-cmd-norm[1]</property>
+    <property>fcs/ballonet-valve-cmd-norm[1]</property>
+   </notify>
+   <condition>
+     simulation/sim-time-sec GE 10.0
+   </condition>
+   <set name="fcs/ballonet-valve-cmd-norm[0]" value="1.0"/>
+   <set name="ap/pitch-setpoint-degrees" value="0.0"/>
+   <set name="ap/pitch-hold-active" value="1.0"/>
+  </event>
+
+
+  <event name="Time notify" persistent="true">
+   <description>Output message at 5 second intervals</description>
+   <notify>
+    <property>attitude/phi-deg</property>
+    <property>attitude/theta-deg</property>
+    <property>attitude/psi-deg</property>
+    <property>fcs/rudder-pos-norm</property>
+    <property>fcs/elevator-pos-norm</property>
+    <property>fcs/throttle-pos-norm[0]</property>
+    <property>ap/yaw-damper-active</property>
+    <property>ap/pitch-hold-active</property>
+    <property>ap/pitch-setpoint-degrees</property>
+   </notify>
+   <condition>
+    simulation/sim-time-sec GE simulation/notify-time-trigger
+   </condition>
+   <set name="simulation/notify-time-trigger" value="5" type="FG_DELTA"/>
+  </event>
+
+ </run>
+</runscript>
