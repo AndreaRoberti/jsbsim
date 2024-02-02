@@ -318,11 +318,10 @@ static void mdlProcessParameters(SimStruct *S)
 
     // Configure the output port(s).
     if (!ssSetNumOutputPorts(S, numOutputs)) return;
-    
-    int i;
+        
     Element* outputElement = outputsElement->FindElement("output");
     int outputSize;
-    for (i = 0; i < numOutputs; i++) {
+    for (int i = 0; i < numOutputs; i++) {
         outputSize = outputElement->GetNumElements("property");
         ssSetOutputPortWidth(S, i, outputSize);
         // Currently no support for setting the name of the output ports.
@@ -366,8 +365,7 @@ static void mdlInitializeSizes(SimStruct *S)
     }
 
     // Work vector(s) for output port(s).
-    int i;
-    for (i = 0; i < numOutputs; i++) {
+    for (int i = 0; i < numOutputs; i++) {
         ssSetDWorkWidth(     S, i+1, ssGetOutputPortWidth(S,i));
         ssSetDWorkDataType(  S, i+1, SS_DOUBLE);
     }
@@ -419,11 +417,6 @@ static void mdlInitializeConditions(SimStruct *S)
     std::string currentPath = "../config.ini"; 
     std::map<std::string, std::string> iniData = JII->parseIniFile(currentPath);
 
-    // Print the parsed key-value pairs
-    for (const auto& pair : iniData) {
-        std::cout << pair.first << " = " << pair.second << std::endl;
-    }
-
     // Check if a script file is given in Simulink.
     // If not, initialize an aircraft
     if (use_script) {
@@ -468,11 +461,10 @@ static void mdlInitializeConditions(SimStruct *S)
     Element* document = XMLFileRead.LoadXMLDocument(SGPath(io_config_file));
 
     // Add input properties JSBSim should take in.
-    int i;
     std::string prop;
     Element* inputElement = document->FindElement("input");
     Element* propElement = inputElement->FindElement("property");
-    for (i = 0; i < inputSize; i++) {
+    for (int i = 0; i < inputSize; i++) {
         prop = propElement->GetDataLine();
         if (!JII->AddInputPropertyNode(prop)) {
             ssSetErrorStatus(S, "Could not add property from XML file to input port.\n"
@@ -487,7 +479,7 @@ static void mdlInitializeConditions(SimStruct *S)
     if (useWeather) {
         Element* weatherElement = document->FindElement("weather");
         propElement = weatherElement->FindElement("property");
-        for (i = 0; i < inputSize; i++) {
+        for (int i = 0; i < inputSize; i++) {
             prop = propElement->GetDataLine();
             if (!JII->AddWeatherPropertyNode(prop)) {
                 ssSetErrorStatus(S, "Could not add property from XML file to weather port.\n"
@@ -500,15 +492,14 @@ static void mdlInitializeConditions(SimStruct *S)
     }
 
     // Add output properties JSBSim will deliver to each output channel.
-    int j;
     int outputSize;
     Element* outputsElement = document->FindElement("outputs");
     Element* outputElement = outputsElement->FindElement("output");
-    for (i = 0; i < numOutputs; i++) {
+    for (int i = 0; i < numOutputs; i++) {
         outputSize = outputElement->GetNumElements();
         propElement = outputElement->FindElement("property");
 
-        for (j = 0; j < outputSize; j++) {
+        for (int j = 0; j < outputSize; j++) {
             prop = propElement->GetDataLine();
             if (!JII->AddOutputPropertyNode(prop, i)) {
                 ssSetErrorStatus(S, "Could not add property from XML file to output port.\n"
@@ -524,14 +515,15 @@ static void mdlInitializeConditions(SimStruct *S)
 
     // Load initial conditions into the output work vectors.
     double *dWorkVector;
-    for (i = 0; i < numOutputs; i++) {
+    for (int i = 0; i < numOutputs; i++) {
         dWorkVector = (double *) ssGetDWork(S,i+1);
         if (!JII->CopyOutputsFromJSBSim(dWorkVector, i)) {
             ssSetErrorStatus(S, "Initial conditions could not be loaded into output.\n");
             return;
         }
     }
-    JII->exportLTI();
+    
+    //JII->exportLTI();
 }
 #endif /* MDL_INITIALIZE_CONDITIONS */
 
@@ -545,12 +537,10 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     
     real_T* output;
     double* dWorkVector;
-    int i;
-    int j;
-    for (i = 0; i < numOutputs; i++) {
+    for (int i = 0; i < numOutputs; i++) {
         output = ssGetOutputPortRealSignal(S, i);
         dWorkVector = (double*) ssGetDWork(S,i+1);
-        for (j = 0; j < ssGetDWorkWidth(S, i+1); j++) {
+        for (int j = 0; j < ssGetDWorkWidth(S, i+1); j++) {
             output[j] = dWorkVector[j];
         }
     }
@@ -576,8 +566,7 @@ static void mdlUpdate(SimStruct *S, int_T tid)
     InputRealPtrsType ctrlCmdInput = ssGetInputPortRealSignalPtrs(S, 0);
     double* dWorkCtrlCmdIn = (double*) ssGetDWork(S, 0);
     std::vector<double> ctrlVec(inputSize);
-    int i;
-    for (i = 0; i < inputSize; i++) {
+    for (int i = 0; i < inputSize; i++) {
         ctrlVec[i] = (double) *ctrlCmdInput[i];
         dWorkCtrlCmdIn[i] = *ctrlCmdInput[i];
     }
@@ -591,7 +580,7 @@ static void mdlUpdate(SimStruct *S, int_T tid)
         InputRealPtrsType weatherInput = ssGetInputPortRealSignalPtrs(S, 1);
         double* dWorkWeatherIn = (double*) ssGetDWork(S, 1);
         std::vector<double> weatherVec(weatherInputSize);
-        for (i = 0; i < weatherInputSize; i++) {
+        for (int i = 0; i < weatherInputSize; i++) {
             weatherVec[i] = (double) *weatherInput[i];
             dWorkWeatherIn[i] = *weatherInput[i];
         }
@@ -605,7 +594,7 @@ static void mdlUpdate(SimStruct *S, int_T tid)
     JII->Update();
     
     double *dWorkVector;
-    for (i = 0; i < numOutputs; i++) {
+    for (int i = 0; i < numOutputs; i++) {
         dWorkVector = (double *) ssGetDWork(S,i+1);
         JII->CopyOutputsFromJSBSim(dWorkVector, i);
     }
