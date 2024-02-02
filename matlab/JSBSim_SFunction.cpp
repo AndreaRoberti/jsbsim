@@ -288,9 +288,9 @@ static void mdlProcessParameters(SimStruct *S)
 
     // Check that there are input and outputs properties.
     Element* inputElement = document->FindElement("input");
-    // if (!inputElement) {
-    //     ssSetErrorStatus(S, "Please define an <input> property for the I/O config file.\n");
-    // }
+    if (!inputElement) {
+        ssSetErrorStatus(S, "Please define an <input> property for the I/O config file.\n");
+    }
     Element* outputsElement = document->FindElement("outputs");
     if (!outputsElement) {
         ssSetErrorStatus(S, "Please define an <outputs> property for the I/O config file.\n");
@@ -302,22 +302,18 @@ static void mdlProcessParameters(SimStruct *S)
 
     // Get necessary sizing data for the input/output ports.
     inputSize = inputElement->GetNumElements();
-    std::cout << "INPUT SIZE "  << inputSize << std::endl;
     numOutputs = outputsElement->GetNumElements();
 
     // Configure the input port.
-    if(inputSize > 0)
-    {
-        if (!useWeather) {
-            if (!ssSetNumInputPorts(S, 1)) return;
-            ssSetInputPortWidth(S, 0, inputSize);
-        } else {
-            if (!ssSetNumInputPorts(S, 2)) return;
-            ssSetInputPortWidth(S, 0, inputSize);
+    if (!useWeather) {
+        if (!ssSetNumInputPorts(S, 1)) return;
+        ssSetInputPortWidth(S, 0, inputSize);
+    } else {
+        if (!ssSetNumInputPorts(S, 2)) return;
+        ssSetInputPortWidth(S, 0, inputSize);
 
-            weatherInputSize = weatherElement->GetNumElements();
-            ssSetInputPortWidth(S, 1, weatherInputSize);
-        }
+        weatherInputSize = weatherElement->GetNumElements();
+        ssSetInputPortWidth(S, 1, weatherInputSize);
     }
 
     // Configure the output port(s).
@@ -360,16 +356,13 @@ static void mdlInitializeSizes(SimStruct *S)
     // Create the work vectors.
     if(!ssSetNumDWork(   S, useWeather ? 2 + numOutputs : 1 + numOutputs)) return; //HW change 
 
-    if(inputSize > 0)
-    {
-        // Work vector for input port.
-        ssSetDWorkWidth(     S, 0, ssGetInputPortWidth(S,0));
-        ssSetDWorkDataType(  S, 0, SS_DOUBLE);
+    // Work vector for input port.
+    ssSetDWorkWidth(     S, 0, ssGetInputPortWidth(S,0));
+    ssSetDWorkDataType(  S, 0, SS_DOUBLE);
 
-        if (useWeather) {
-            ssSetDWorkWidth(     S, numOutputs + 1, ssGetInputPortWidth(S,1));
-            ssSetDWorkDataType(  S, numOutputs + 1, SS_DOUBLE);
-        }
+    if (useWeather) {
+        ssSetDWorkWidth(     S, numOutputs + 1, ssGetInputPortWidth(S,1));
+        ssSetDWorkDataType(  S, numOutputs + 1, SS_DOUBLE);
     }
 
     // Work vector(s) for output port(s).
@@ -423,8 +416,13 @@ static void mdlInitializeConditions(SimStruct *S)
     ssGetPWork(S)[0] = (void *) JII;
 
     // Get the current working directory
-    std::string currentPath = "./config.ini"; 
+    std::string currentPath = "../config.ini"; 
     std::map<std::string, std::string> iniData = JII->parseIniFile(currentPath);
+
+    // Print the parsed key-value pairs
+    for (const auto& pair : iniData) {
+        std::cout << pair.first << " = " << pair.second << std::endl;
+    }
 
     // Check if a script file is given in Simulink.
     // If not, initialize an aircraft
@@ -575,43 +573,39 @@ static void mdlUpdate(SimStruct *S, int_T tid)
 
     JSBSimInterface* JII = (JSBSimInterface*) ssGetPWork(S)[0];
 
-    if(inputSize > 0)
-    {
-        InputRealPtrsType ctrlCmdInput = ssGetInputPortRealSignalPtrs(S, 0);
-        double* dWorkCtrlCmdIn = (double*) ssGetDWork(S, 0);
-        std::vector<double> ctrlVec(inputSize);
-        
-        for (int i = 0; i < inputSize; i++) {
-            ctrlVec[i] = (double) *ctrlCmdInput[i];
-            dWorkCtrlCmdIn[i] = *ctrlCmdInput[i];
-        }
-        
-        if (!JII->CopyInputControlsToJSBSim(ctrlVec)) {
-            ssSetErrorStatus(S, "Issue copying control inputs to JSBSim.\n");
-            return;
-        }
+    InputRealPtrsType ctrlCmdInput = ssGetInputPortRealSignalPtrs(S, 0);
+    double* dWorkCtrlCmdIn = (double*) ssGetDWork(S, 0);
+    std::vector<double> ctrlVec(inputSize);
+    int i;
+    for (i = 0; i < inputSize; i++) {
+        ctrlVec[i] = (double) *ctrlCmdInput[i];
+        dWorkCtrlCmdIn[i] = *ctrlCmdInput[i];
+    }
     
+    if (!JII->CopyInputControlsToJSBSim(ctrlVec)) {
+        ssSetErrorStatus(S, "Issue copying control inputs to JSBSim.\n");
+        return;
+    }
 
-        if (useWeather) {
-            InputRealPtrsType weatherInput = ssGetInputPortRealSignalPtrs(S, 1);
-            double* dWorkWeatherIn = (double*) ssGetDWork(S, 1);
-            std::vector<double> weatherVec(weatherInputSize);
-            for (int i = 0; i < weatherInputSize; i++) {
-                weatherVec[i] = (double) *weatherInput[i];
-                dWorkWeatherIn[i] = *weatherInput[i];
-            }
+    if (useWeather) {
+        InputRealPtrsType weatherInput = ssGetInputPortRealSignalPtrs(S, 1);
+        double* dWorkWeatherIn = (double*) ssGetDWork(S, 1);
+        std::vector<double> weatherVec(weatherInputSize);
+        for (i = 0; i < weatherInputSize; i++) {
+            weatherVec[i] = (double) *weatherInput[i];
+            dWorkWeatherIn[i] = *weatherInput[i];
+        }
 
-            if (!JII->CopyInputWeatherToJSBSim(weatherVec)) {
-                ssSetErrorStatus(S, "Issue copying weather inputs to JSBSim.\n");
-                return;
-            }
+        if (!JII->CopyInputWeatherToJSBSim(weatherVec)) {
+            ssSetErrorStatus(S, "Issue copying weather inputs to JSBSim.\n");
+            return;
         }
     }
 
     JII->Update();
     
     double *dWorkVector;
-    for (int i = 0; i < numOutputs; i++) {
+    for (i = 0; i < numOutputs; i++) {
         dWorkVector = (double *) ssGetDWork(S,i+1);
         JII->CopyOutputsFromJSBSim(dWorkVector, i);
     }
