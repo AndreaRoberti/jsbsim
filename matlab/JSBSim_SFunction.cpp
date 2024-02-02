@@ -414,7 +414,7 @@ static void mdlInitializeConditions(SimStruct *S)
     ssGetPWork(S)[0] = (void *) JII;
 
     // Get the current working directory
-    std::string currentPath = "../config.ini"; 
+    std::string currentPath = "./config.ini"; 
     std::map<std::string, std::string> iniData = JII->parseIniFile(currentPath);
 
     // Check if a script file is given in Simulink.
