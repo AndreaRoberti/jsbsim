@@ -413,6 +413,15 @@ static void mdlInitializeConditions(SimStruct *S)
     JSBSimInterface *JII = new JSBSimInterface(delta_t, numOutputs);
     ssGetPWork(S)[0] = (void *) JII;
 
+    // Get the current working directory
+    std::string currentPath = "D:/Lavoro/montagna/dev_JSBSim/jsbsim/matlab/config.ini"; 
+    std::map<std::string, std::string> iniData = JII->parseIniFile(currentPath);
+
+    // Print the parsed key-value pairs
+    for (const auto& pair : iniData) {
+        std::cout << pair.first << " = " << pair.second << std::endl;
+    }
+
     // Check if a script file is given in Simulink.
     // If not, initialize an aircraft
     if (use_script) {
@@ -520,6 +529,7 @@ static void mdlInitializeConditions(SimStruct *S)
             return;
         }
     }
+    JII->exportLTI();
 }
 #endif /* MDL_INITIALIZE_CONDITIONS */
 

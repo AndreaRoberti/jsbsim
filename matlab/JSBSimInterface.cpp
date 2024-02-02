@@ -37,7 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 JSBSimInterface::JSBSimInterface(int numOutputPorts)
 {
 	_ac_model_loaded = false;
-	fdmExec = new FGFDMExec;
+	fdmExec = new FGFDMExec();
 	pm = fdmExec->GetPropertyManager().get();
 	propagate = fdmExec->GetPropagate().get();
 	accel = fdmExec->GetAccelerations().get();
@@ -51,12 +51,13 @@ JSBSimInterface::JSBSimInterface(int numOutputPorts)
 		outputPorts.push_back(emptyVector);
 	}
 	//verbosityLevel = JSBSimInterface::eSilent;
+	LoadSettings();
 }
 
 JSBSimInterface::JSBSimInterface(double dt, int numOutputPorts)
 {
 	_ac_model_loaded = false;
-	fdmExec = new FGFDMExec;
+	fdmExec = new FGFDMExec();
 	fdmExec->Setdt(dt);
 	mexPrintf("Simulation dt set to %f\n",fdmExec->GetDeltaT());
 	pm = fdmExec->GetPropertyManager().get();
@@ -72,6 +73,7 @@ JSBSimInterface::JSBSimInterface(double dt, int numOutputPorts)
 		outputPorts.push_back(emptyVector);
 	}
 	//verbosityLevel = JSBSimInterface::eSilent;
+	LoadSettings();	
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,20 +82,53 @@ JSBSimInterface::~JSBSimInterface(void)
     delete fdmExec;
 }
 
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+bool JSBSimInterface::LoadSettings()
+{	
+    std::string current_config_path = "./config.ini"; 
+    std::map<std::string, std::string> iniData = parseIniFile(current_config_path);
+    
+	if(!iniData.empty())
+	{
+		for (const auto& pair : iniData) {
+			std::cout << pair.first << " == " << pair.second << std::endl;
+			 if(pair.first == "Paths.aircraft")
+			 {
+			 	fdmExec->SetAircraftPath(SGPath(pair.second));
+				std::cout << "AIRCRAFT  " << fdmExec->GetAircraftPath() << std::endl;
+				
+			 }
+			 else if (pair.first == "Paths.engine")
+			 {
+			 	fdmExec->SetEnginePath(SGPath(pair.second));
+				std::cout << "ENGINE  " << fdmExec->GetEnginePath() << std::endl;
+			 }
+			else if (pair.first == "Paths.systems")
+			 {
+			 	fdmExec->SetSystemsPath(SGPath(pair.second));
+				std::cout << "SYSTEMS  " << fdmExec->GetSystemsPath() << std::endl;
+			 }
+		}
+		std::cout << "------------------------------------"  << std::endl;
+		return true;
+	}
+	else
+	{
+		    if (!fdmExec->SetAircraftPath (SGPath("aircraft"))) return false;  
+    		if (!fdmExec->SetEnginePath   (SGPath("engine"))) return false;
+    		if (!fdmExec->SetSystemsPath  (SGPath("systems"))) return false;
+			return true;
+	}
+}
+
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bool JSBSimInterface::OpenAircraft(const string& acName)
 {
 
 	if (!fdmExec->GetAircraft()->GetAircraftName().empty()) return false;
 
-    mexPrintf("\tSetting up JSBSim with standard 'aircraft', 'engine', and 'system' paths.\n");  
-    if (!fdmExec->SetAircraftPath (SGPath("aircraft"))) return false;
-    if (!fdmExec->SetEnginePath   (SGPath("engine"))) return false;
-    if (!fdmExec->SetSystemsPath  (SGPath("systems"))) return false;
-
-    mexPrintf("\tLoading aircraft '%s' ...\n",acName.c_str());
-
-    if ( ! fdmExec->LoadModel(SGPath("aircraft"), SGPath("engine"), SGPath("systems"), acName)) return false;
+    if ( ! fdmExec->LoadModel(acName)) return false;
 
 	_ac_model_loaded = true;
 
@@ -103,11 +138,6 @@ bool JSBSimInterface::OpenAircraft(const string& acName)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bool JSBSimInterface::OpenScript(const SGPath& script, double delta_t, const SGPath& initfile)
 {
-    
-    if (!fdmExec->SetAircraftPath (SGPath("aircraft"))) return false;  
-    if (!fdmExec->SetEnginePath   (SGPath("engine"))) return false;
-    if (!fdmExec->SetSystemsPath  (SGPath("systems"))) return false;
-
     if (!fdmExec->LoadScript(script, delta_t, initfile)) return false;
 
     if (!fdmExec->RunIC()) return false;
@@ -124,14 +154,13 @@ bool JSBSimInterface::LoadIC(SGPath ResetName)
     if (!IC->Load(ResetName)) return false;
 
     if (!fdmExec->RunIC()) return false;
-
+	
 	return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 void JSBSimInterface::Update()
 {
-
     fdmExec->Run();
 }
 
@@ -244,7 +273,7 @@ bool JSBSimInterface::CopyOutputsFromJSBSim(double *stateArray, const int output
 	if (outputPort >= outputPorts.size()) {
 		mexPrintf("Output port selected is out of bounds.\n");
 	}
-
+	
 	FGPropertyNode* node;
 	std::vector<FGPropertyNode*> port = outputPorts.at(outputPort);
 	for (int i = 0; i < port.size(); i++) {
@@ -269,6 +298,130 @@ bool JSBSimInterface::CopyOutputsFromJSBSim(double *stateArray, const int output
 				return false;
 		}
 	}
-
+	
 	return true;
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+std::map<std::string, std::string> JSBSimInterface::parseIniFile(const std::string& filename) {
+    std::map<std::string, std::string> iniData;
+    std::ifstream inFile(filename);
+
+    if (!inFile) {
+        std::cerr << "Error opening file: " << filename << ". Default directories for settings will be loaded" << std::endl;
+        return iniData; // Return an empty map if file opening fails
+    }
+
+    std::string line;
+    std::string currentSection;
+
+    while (std::getline(inFile, line)) {
+        // Remove leading and trailing whitespaces
+        line.erase(line.find_last_not_of(" \t") + 1);
+        line.erase(0, line.find_first_not_of(" \t"));
+
+        if (line.empty() || line[0] == ';' || line[0] == '#') {
+            // Ignore empty lines or comments
+            continue;
+        } else if (line[0] == '[' && line.back() == ']') {
+            // Handle section headers
+            currentSection = line.substr(1, line.size() - 2);
+        } else {
+            // Parse key-value pairs
+            std::size_t equalPos = line.find('=');
+            if (equalPos != std::string::npos) {
+                std::string key = line.substr(0, equalPos);
+                std::string value = line.substr(equalPos + 1);
+                iniData[currentSection + "." + key] = value;
+            }
+        }
+    }
+
+    inFile.close();
+    return iniData;
+}
+
+
+
+void JSBSimInterface::exportLTI()
+{
+	FGLinearization lin(fdmExec);
+
+	mxArray* mxMatrixA = exportMatrixToMatlab(lin.GetSystemMatrix());
+    int statusA = mexPutVariable("base", "A", mxMatrixA);
+	mxDestroyArray(mxMatrixA);
+
+	mxArray* mxMatrixB = exportMatrixToMatlab(lin.GetInputMatrix());
+    int statusB = mexPutVariable("base", "B", mxMatrixB);
+	mxDestroyArray(mxMatrixB);
+
+	mxArray* mxMatrixC = exportMatrixToMatlab(lin.GetOutputMatrix());
+    int statusC = mexPutVariable("base", "C", mxMatrixC);
+	mxDestroyArray(mxMatrixC);
+
+	mxArray* mxMatrixD = exportMatrixToMatlab(lin.GetFeedforwardMatrix());
+    int statusD = mexPutVariable("base", "D", mxMatrixD);
+	mxDestroyArray(mxMatrixD);
+
+
+	mxArray* mxStateNames = exportStringVectorToMatlab(lin.GetStateNames());
+	int statusSN = mexPutVariable("base", "state_names", mxStateNames);
+	mxDestroyArray(mxStateNames);
+
+	mxArray* mxInputNames = exportStringVectorToMatlab(lin.GetInputNames());
+	int statuIN = mexPutVariable("base", "input_names", mxInputNames);
+	mxDestroyArray(mxInputNames);
+
+	mxArray* mxOutputNames = exportStringVectorToMatlab(lin.GetOutputNames());
+	int statusON = mexPutVariable("base", "output_names", mxOutputNames);
+	mxDestroyArray(mxOutputNames);
+}
+
+// Function to export a vector of strings to MATLAB
+mxArray* JSBSimInterface::exportStringVectorToMatlab(const std::vector<std::string>& stringVector) {
+    mwSize numStrings = stringVector.size();
+
+    // Create cell array mxArray
+    mxArray* mxCellArray = mxCreateCellMatrix(1, numStrings);
+    if (mxCellArray == nullptr) {
+        mexErrMsgTxt("Memory allocation failed for cell array.");
+        return nullptr;
+    }
+
+    // Fill cell array with strings
+    for (mwIndex i = 0; i < numStrings; ++i) {
+        mxArray* mxString = mxCreateString(stringVector[i].c_str());
+        if (mxString == nullptr) {
+            mxDestroyArray(mxCellArray);
+            mexErrMsgTxt("Memory allocation failed for string.");
+            return nullptr;
+        }
+        mxSetCell(mxCellArray, i, mxString);
+    }
+
+    return mxCellArray;
+}
+
+// Function to export a matrix to MATLAB
+mxArray* JSBSimInterface::exportMatrixToMatlab(const std::vector<std::vector<double>>& matrix) {
+    mwSize numRows = matrix.size();
+    mwSize numCols = (numRows > 0) ? matrix[0].size() : 0;
+
+    // Create mxArray
+    mxArray* mxMatrix = mxCreateDoubleMatrix(numRows, numCols, mxREAL);
+    if (mxMatrix == nullptr) {
+        // Handle memory allocation failure
+        mexErrMsgTxt("Memory allocation failed.");
+        return nullptr;
+    }
+
+    // Copy data to mxArray
+    double* dataPtr = mxGetPr(mxMatrix);
+    for (mwSize i = 0; i < numRows; ++i) {
+        for (mwSize j = 0; j < numCols; ++j) {
+            dataPtr[i + j * numRows] = matrix[i][j];
+        }
+    }
+
+    return mxMatrix;
 }

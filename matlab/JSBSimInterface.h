@@ -30,11 +30,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define JSBSIMINTERFACE_HEADER_H
 
 #include "mex.h"
+#include "matrix.h"
 #include <FGFDMExec.h>
 #include <initialization/FGInitialCondition.h>
+#include <initialization/FGLinearization.h>
 #include <models/FGAuxiliary.h>
 #include <models/FGPropulsion.h>
 #include <models/FGFCS.h>
+#include "math/FGStateSpace.h"
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <map>
 
 using namespace JSBSim;
 
@@ -90,7 +98,18 @@ public:
 	// false - never hold the simulation time from advancing
 	// TODO: make setable
 	bool RunFCS() {return fcs->Run(false);}
+    
+    // Function to parse .ini file and store key-value pairs in a map
+    std::map<std::string, std::string> parseIniFile(const std::string& filename);
+	
+	// load paths
+	bool LoadSettings();
 
+	mxArray* exportStringVectorToMatlab(const std::vector<std::string>& stringVector);
+	
+	mxArray* exportMatrixToMatlab(const std::vector<std::vector<double>>& matrix);
+
+	void exportLTI();
 
 private:
 	FGFDMExec *fdmExec;
@@ -123,6 +142,11 @@ private:
 	double _xdot, _ydot, _zdot;
 	double _phidot, _thetadot, _psidot;
 	double _alphadot,_betadot,_hdot;
+
+	std::vector<std::vector<double>> A,B,C,D;
+    std::vector<double> x0, u0, y0;
+    std::vector<string> x_names, u_names, y_names, x_units, u_units, y_units;
+    std::string aircraft_name;
 
 };
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

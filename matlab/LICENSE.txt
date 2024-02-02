@@ -4,6 +4,8 @@ Copyright (c) 2021, Agostino De Marco, Elia Tarasov, Michal Podhradsky, Tilda Si
 
 Copyright (c) 2022, Noah Curran
 
+Copyright (c) 2024, Andrea Roberti
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
