@@ -28,8 +28,11 @@
 #include "models/propulsion/FGTurboProp.h"
 #include <fstream>
 #include <cstdlib>
+#include "FGFDMExec.h"
 
 namespace JSBSim {
+
+class FGFDMExec;
 
 template <class T>
 using Vector2D = std::vector<std::vector<T>>;
@@ -46,7 +49,9 @@ public:
     /**
      * @param fdmPtr Already configured FGFDMExec instance used to create the new linear model.
      */
-    FGLinearization(FGFDMExec * fdmPtr);
+    explicit FGLinearization(FGFDMExec * fdmPtr);
+
+    ~FGLinearization();
 
     /**
      * Write Scicoslab source file with the state space model to a

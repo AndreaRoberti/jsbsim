@@ -42,6 +42,7 @@ __pycache__/
 #################
 ## Visual Studio
 #################
+*.vcxproj
 
 ## Ignore Visual Studio temporary files, build results
 
@@ -90,6 +91,10 @@ ipch/
 # CMake
 cmake-build-*/
 
+#################
+## Matlab
+#################
+matlab/*.mexw64
 
 #################
 ## Unreal Engine

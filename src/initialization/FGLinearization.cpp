@@ -19,10 +19,9 @@
 #include "FGInitialCondition.h"
 #include "FGLinearization.h"
 
-
 namespace JSBSim {
 
-FGLinearization::FGLinearization(FGFDMExec * fdm)
+FGLinearization::FGLinearization(FGFDMExec *fdm)
     : aircraft_name(fdm->GetAircraft()->GetAircraftName())
 {
     FGStateSpace ss(fdm);
@@ -30,23 +29,25 @@ FGLinearization::FGLinearization(FGFDMExec * fdm)
     ss.x.add(new FGStateSpace::Alpha);
     ss.x.add(new FGStateSpace::Theta);
     ss.x.add(new FGStateSpace::Q);
-
     // get propulsion pointer to determine type/ etc.
-    auto engine0 = fdm->GetPropulsion()->GetEngine(0);
-    FGThruster * thruster0 = engine0->GetThruster();
-
-    if (thruster0->GetType()==FGThruster::ttPropeller)
-    {
-        ss.x.add(new FGStateSpace::Rpm0);
-        // TODO add variable prop pitch property
-        // if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
-        int numEngines = fdm->GetPropulsion()->GetNumEngines();
-        if (numEngines>1) ss.x.add(new FGStateSpace::Rpm1);
-        if (numEngines>2) ss.x.add(new FGStateSpace::Rpm2);
-        if (numEngines>3) ss.x.add(new FGStateSpace::Rpm3);
-        if (numEngines>4) {
-            std::cerr << "more than 4 engines not currently handled" << std::endl;
-        }
+    
+    int numEngines = fdm->GetPropulsion()->GetNumEngines();
+    if(numEngines>0)
+     {
+        auto engine0 = fdm->GetPropulsion()->GetEngine(0);
+        FGThruster * thruster0 = engine0->GetThruster();
+        if (thruster0->GetType()==FGThruster::ttPropeller)
+        {
+            ss.x.add(new FGStateSpace::Rpm0);
+            // TODO add variable prop pitch property
+            // if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
+            if (numEngines>1) ss.x.add(new FGStateSpace::Rpm1);
+            if (numEngines>2) ss.x.add(new FGStateSpace::Rpm2);
+            if (numEngines>3) ss.x.add(new FGStateSpace::Rpm3);
+            if (numEngines>4) {
+                std::cerr << "more than 4 engines not currently handled" << std::endl;
+            }
+        }  
     }
     ss.x.add(new FGStateSpace::Beta);
     ss.x.add(new FGStateSpace::Phi);
@@ -81,6 +82,11 @@ FGLinearization::FGLinearization(FGFDMExec * fdm)
     y_units = ss.y.getUnit();
 }
 
+FGLinearization::~FGLinearization()
+{
+}
+
+
 void FGLinearization::WriteScicoslab() const {
     auto path = std::string(aircraft_name+"_lin.sce");
     WriteScicoslab(path);
@@ -104,6 +110,37 @@ void FGLinearization::WriteScicoslab(std::string& path) const {
             << std::endl;
     scicos.close();
 
+    std::cout << std::endl << "MATRIX A " << std::endl;
+    for (const auto &row : GetSystemMatrix()) {
+        for (const auto &element : row) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl << "MATRIX B " << std::endl;
+    for (const auto &row : GetInputMatrix()) {
+        for (const auto &element : row) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl << "MATRIX C " << std::endl;
+    for (const auto &row : GetOutputMatrix()) {
+        for (const auto &element : row) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl << "MATRIX D " << std::endl;
+    for (const auto &row : GetFeedforwardMatrix()) {
+        for (const auto &element : row) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 } // JSBSim
