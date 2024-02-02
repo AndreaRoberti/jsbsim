@@ -4,6 +4,8 @@ All rights reserved.
 
 Copyright (c) 2021, Agostino De Marco, Elia Tarasov, Michal Podhradsky, Tilda Sikström
 
+Copyright (c) 2024, Andrea Roberti
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
@@ -31,8 +33,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <models/FGAccelerations.h>
 #include <math/FGQuaternion.h>
 
-/* 2021-07-08 compiles with JSBSim 1.1.6
- */
 
 JSBSimInterface::JSBSimInterface(int numOutputPorts)
 {
@@ -92,7 +92,6 @@ bool JSBSimInterface::LoadSettings()
 	if(!iniData.empty())
 	{
 		for (const auto& pair : iniData) {
-			std::cout << pair.first << " == " << pair.second << std::endl;
 			 if(pair.first == "Paths.aircraft")
 			 {
 			 	fdmExec->SetAircraftPath(SGPath(pair.second));
@@ -110,6 +109,7 @@ bool JSBSimInterface::LoadSettings()
 				std::cout << "SYSTEMS  " << fdmExec->GetSystemsPath() << std::endl;
 			 }
 		}
+		std::cout << "------------------------------------"  << std::endl;
 		std::cout << "------------------------------------"  << std::endl;
 		return true;
 	}
@@ -341,8 +341,7 @@ std::map<std::string, std::string> JSBSimInterface::parseIniFile(const std::stri
     return iniData;
 }
 
-
-
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 void JSBSimInterface::exportLTI()
 {
 	FGLinearization lin(fdmExec);
@@ -377,7 +376,7 @@ void JSBSimInterface::exportLTI()
 	mxDestroyArray(mxOutputNames);
 }
 
-// Function to export a vector of strings to MATLAB
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 mxArray* JSBSimInterface::exportStringVectorToMatlab(const std::vector<std::string>& stringVector) {
     mwSize numStrings = stringVector.size();
 
@@ -402,7 +401,7 @@ mxArray* JSBSimInterface::exportStringVectorToMatlab(const std::vector<std::stri
     return mxCellArray;
 }
 
-// Function to export a matrix to MATLAB
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 mxArray* JSBSimInterface::exportMatrixToMatlab(const std::vector<std::vector<double>>& matrix) {
     mwSize numRows = matrix.size();
     mwSize numCols = (numRows > 0) ? matrix[0].size() : 0;

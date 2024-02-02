@@ -4,6 +4,8 @@ All rights reserved.
 
 Copyright (c) 2021, Agostino De Marco, Elia Tarasov, Michal Podhradsky, Tilda Sikström
 
+Copyright (c) 2024, Andrea Roberti
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
@@ -102,13 +104,16 @@ public:
     // Function to parse .ini file and store key-value pairs in a map
     std::map<std::string, std::string> parseIniFile(const std::string& filename);
 	
-	// load paths
+	// load paths (aircraft, systems, engine)
 	bool LoadSettings();
 
+	// Function to export a vector of strings to MATLAB mxArray
 	mxArray* exportStringVectorToMatlab(const std::vector<std::string>& stringVector);
 	
+	// Function to export a matrix to MATLAB mxArray
 	mxArray* exportMatrixToMatlab(const std::vector<std::vector<double>>& matrix);
 
+	// Function that export the Matrix A,B,C,D to matlab workspace
 	void exportLTI();
 
 private:
