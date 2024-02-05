@@ -67,6 +67,13 @@ public:
     void WriteScicoslab(std::string& path) const;
 
     /**
+     * Write CSV files of the state space model
+    */
+    void WriteCSV() const;
+
+    void setupCSV(std::string matrix, Vector2D<double> data, std::vector<std::string> names) const;
+
+    /**
      * Get the state space model matrices.
      *
      * @param A_ System matrix

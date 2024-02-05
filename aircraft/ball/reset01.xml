@@ -2,6 +2,11 @@
 <initialize name="reset00">
   <!--
     This file sets up the cannonball to fire.
+    
+    The file above sets the ball up with an initial velocity of 500 feet per second along its own X axis,
+    and an angle (THETA)of 40 degrees above the horizon, at a heading of 40 (psi) degrees east of north. 
+  
+    The initial location is on the equator at 90 degrees est longitude.
   -->
   <ubody unit="FT/SEC">  500.0  </ubody>
   <vbody unit="FT/SEC">    0.0  </vbody>

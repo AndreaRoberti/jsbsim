@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!--
+  Pratt and Whitney R-1340-AN2 for JSBSim
+
+    Copyright (C) 2010 - 2017  Anders Gidenstam  (anders(at)gidenstam.org)
+    This file is licensed under the GPL license version 2 or later.
+
+  <reference
+   refID="FAA:TC-5E-2"
+   author="FAA"
+   title="http://www.airweb.faa.gov/Regulatory_and_Guidance_Library/rgMakeModel.nsf/0/557844629a50a6388525676a006740c9/$FILE/ATTY2APL/5E-2.pdf"
+   date="?"/>
+
+  Operating Limits [GAC:1942:PM]:
+    Minimum Oil Inlet Temperature
+      for Take-Off                        40 degC
+    Desired Oil Inlet Temperature         60 - 75 degC
+    Maximum  Oil Inlet Temperature        85 degC
+    Maximum Cylinder Temperature    Head  288 degC
+      1 to 1.5 min. Climb           Base  168 degC
+    Maximum Cylinder Temperature    Head  232 degC
+      Continuous Cruising           Base  93 - 121 degC
+    Minimum Oil Pressure (at idling
+      speeds)                             10 lbs/sq.in.
+    Desired Oil Pressure                  70 - 90 lbs/sq.in.
+    Minimum Fuel Pressure (400 RPM
+      or less)                            2 lbs/sq.in.
+    Minimum Fuel Pressure (all
+      speeds above 1200 RPM)              4 lbs/sq.in.
+    Desired Fuel Pressure                 5 lbs/sq.in.
+    Maximum Fuel Pressure                 6 lbs/sq.in.
+    Desired Carburetor Air intake Temp.
+      Take-Off                            50 degC
+      Cruising                            40 degC
+
+  The rating given in [GAC:1942:DS]: 425 hp @ 1775 RPM might mean that the
+  engine is rated lower than in the current type certificate.
+
+-->
+<piston_engine name="R-1340-AN2">
+ <displacement unit="IN3"> 1344.0 </displacement>
+ <bore unit="IN">            5.75 </bore>
+ <stroke unit="IN">          5.75 </stroke>
+ <compression-ratio>         6.00 </compression-ratio>
+ <cylinders>                 9.00 </cylinders>
+ <cycles>                    4.00 </cycles>
+
+ <maxhp>                   600.0 </maxhp>
+ <!--bsfc>                      0.37 </bsfc-->
+ <!--volumetric-efficiency>     0.85 </volumetric-efficiency -->
+ <idlerpm>                 550.0 </idlerpm>
+ <maxrpm>                 2250.0 </maxrpm>
+
+ <numboostspeeds> 1.0 </numboostspeeds>
+ <boostoverride>  0 </boostoverride>
+
+ <ratedboost1 unit="INHG">     2.58 </ratedboost1>
+ <ratedpower1 unit="HP">     550.00 </ratedpower1>
+ <ratedrpm1>                2200.00 </ratedrpm1>
+ <ratedaltitude1 unit="FT"> 5000.00 </ratedaltitude1>
+
+ <takeoffboost unit="INHG">    6.08 </takeoffboost>
+
+ <sparkfaildrop>               0.10 </sparkfaildrop>
+
+ <minmp unit="INHG">          10.0 </minmp>
+ <maxmp unit="INHG">          36.00 </maxmp>
+ <maxthrottle>                 1.00 </maxthrottle>
+ <minthrottle>                 0.10 </minthrottle>
+
+ <function name="propulsion/engine[#]/fuel-pump-running-norm">
+  <product>
+   <property>propulsion/engine[#]/fuel-pump-serviceable</property>
+   <quotient>
+    <property>propulsion/engine[#]/engine-rpm</property>
+    <value>2600.0</value>
+   </quotient>
+  </product>
+ </function>
+
+</piston_engine>

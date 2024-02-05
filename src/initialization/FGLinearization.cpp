@@ -90,7 +90,37 @@ FGLinearization::~FGLinearization()
 void FGLinearization::WriteScicoslab() const {
     auto path = std::string(aircraft_name+"_lin.sce");
     WriteScicoslab(path);
+
+    WriteCSV();
 }
+
+void FGLinearization::WriteCSV() const {    
+    setupCSV("A", GetSystemMatrix(), GetStateNames());
+    setupCSV("B", GetInputMatrix(), GetInputNames());
+    setupCSV("C", GetOutputMatrix(), GetOutputNames());
+    setupCSV("D", GetFeedforwardMatrix(), GetInputNames());
+}
+
+void FGLinearization::setupCSV(std::string matrix, Vector2D<double> data, std::vector<std::string> names) const {
+
+    auto path = std::string(aircraft_name + "_" +  matrix +  ".csv");
+    std::ofstream file_;
+    file_.open(path);
+    for( const auto &n : names)
+    {
+        file_ << n << " ";
+    }
+    file_ << std::endl;
+
+    for (const auto &row : data) {
+        for (const auto &element : row) {
+            file_ << element << " ";
+        }
+        file_ << std::endl;
+    }
+}
+
+
 
 void FGLinearization::WriteScicoslab(std::string& path) const {
     int width=20;

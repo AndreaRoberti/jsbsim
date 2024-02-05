@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<system name="ZNP-K Autopilot">
+
+  <!-- INTERFACE PROPERTIES -->
+  <property>ap/yaw-damper-active</property>
+  <property>ap/pitch-setpoint-degrees</property>
+  <property>ap/pitch-hold-active</property>
+
+  <!-- SENSORS -->
+
+  <!-- CHANNELS -->
+
+  <channel name="Rudder">
+
+    <pid name="ap/yaw-damper-pid"> 
+      <input> aero/beta-deg </input>
+      <kp>   10.000 </kp>
+      <ki>    0.000 </ki>
+      <kd>    0.000 </kd>
+      <clipto>
+        <min>-1.0</min>
+        <max> 1.0</max>
+      </clipto> 
+    </pid>
+
+    <summer name="ap/heading-sum">
+      <input> ap/yaw-damper-pid </input>
+    </summer>
+
+    <switch name="ap/heading-switch">
+      <default value="0.0"/>
+      <test logic="AND" value="ap/heading-sum">
+            ap/yaw-damper-active == 1
+            fcs/rudder-cmd-norm gt -0.1
+            fcs/rudder-cmd-norm lt 0.1
+      </test>
+      <output>ap/rudder-cmd-norm</output>
+    </switch>
+
+  </channel>
+
+  <channel name="Elevator">
+
+    <pure_gain name="ap/pitch-setpoint-rad">
+      <input> ap/pitch-setpoint-degrees </input>
+      <gain> 0.017453 </gain>
+    </pure_gain>
+
+    <summer name="ap/pitch-error-rad">
+      <input> attitude/theta-rad</input>
+      <input> -ap/pitch-setpoint-rad </input>
+    </summer>
+
+    <pid name="ap/elevator-pid"> 
+      <input> ap/pitch-error-rad </input>
+      <kp>   5.00 </kp>
+      <ki>   0.00 </ki>
+      <kd>   0.01 </kd>
+      <clipto>
+        <min>-1.0</min>
+        <max> 1.0</max>
+      </clipto> 
+    </pid>
+
+    <switch name="ap/elevator-switch">
+      <default value="0.0"/>
+      <test logic="AND" value="ap/elevator-pid">
+            ap/pitch-hold-active == 1
+      </test>
+      <output>ap/elevator-cmd-norm</output>
+    </switch>
+
+  </channel>
+
+</system>
