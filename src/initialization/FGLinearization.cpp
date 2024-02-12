@@ -106,7 +106,7 @@ void FGLinearization::setupCSV(std::string matrix, Vector2D<double> data, std::v
     auto path = std::string(aircraft_name + "_" +  matrix +  ".csv");
     std::ofstream file_;
     file_.open(path);
-    for( const auto &n : names)
+    for( const std::string &n : names)
     {
         file_ << n << " ";
     }
@@ -171,6 +171,14 @@ void FGLinearization::WriteScicoslab(std::string& path) const {
         }
         std::cout << std::endl;
     }
+
+    
+    std::cout << std::endl << "MATRIX INPUT NAMES " << std::endl;
+    for( const auto &n : GetInputNames())
+    {
+         std::cout << n << " ";
+    }
+
 }
 
 } // JSBSim

@@ -94,8 +94,8 @@
         value="0.0"/>
   </event>
 
-  <event name="Strong wind from north">
-   <description>Strong wind from north</description>
+  <event name="Strong wind from east">
+   <description>Strong wind from east</description>
    <condition>
     simulation/sim-time-sec GT 50.0
    </condition>
