@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+
+<system name="Effectors">
+  <channel name="Electronic Speed Controllers">
+    <actuator name="Right">
+      <input>fcs/cmdEscFR_nd</input>
+      <clipto>
+        <min>0.0</min>
+        <max>1.0</max>
+      </clipto>
+      <output>fcs/throttle-cmd-norm[0]</output>
+    </actuator>
+
+    <actuator name="Left">
+      <input>fcs/cmdEscAL_nd</input>
+      <clipto>
+        <min>0.0</min>
+        <max>1.0</max>
+      </clipto>
+      <output>fcs/throttle-cmd-norm[1]</output>
+    </actuator>
+  </channel>
+</system>

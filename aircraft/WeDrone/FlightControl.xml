@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<flight_control name="FCS">
+
+  <documentation>
+    Control Surface Movements
+      Elevators:     +/- 35 degrees.
+  </documentation>
+
+  <!--    
+  === Pitch ==================================================
+  -->
+  <channel name="Pitch">
+
+   <summer name="fcs/elevator/cmd-norm">
+    <input>fcs/elevator-cmd-norm</input>
+    <input>fcs/pitch-trim-cmd-norm</input>
+      <!--<input>ap/elevator-cmd-norm</input> -->
+    <clipto>
+     <min>-1</min>
+     <max>1</max>
+    </clipto>
+   </summer>
+
+   <aerosurface_scale name="fcs/elevator/pos-rad">
+    <input>fcs/elevator/cmd-norm</input>
+    <domain>
+     <min>-1</min>
+     <max>1</max>
+    </domain>
+    <range>
+     <min>-0.6109</min>
+     <max>0.6109</max>
+    </range>
+    <output>fcs/elevator-pos-rad</output>
+   </aerosurface_scale>
+
+   <aerosurface_scale name="fcs/elevator/pos-norm">
+    <input>fcs/elevator/pos-rad</input>
+    <domain>
+     <min>-0.6109</min>
+     <max>0.6109</max>
+    </domain>
+    <range>
+     <min>-1</min>
+     <max>1</max>
+    </range>
+    <output>fcs/elevator-pos-norm</output>
+   </aerosurface_scale>
+  </channel>
+
+  <!--
+  === Yaw ====================================================
+
+  <channel name="Yaw">
+   
+  </channel>
+  -->
+
+
+
+</flight_control>

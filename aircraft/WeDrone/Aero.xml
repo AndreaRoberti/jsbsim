@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+
+<aerodynamics>
+
+  <!-- Aerodynamic constants. -->
+  <property value="5.5">  aero/constants/length-m </property>
+  <property value="5.5">    aero/constants/diameter-m </property>
+  <property value="30.25"> aero/constants/length-diameter-m2 </property>
+  <property value="34.85">   aero/constants/volume-m3 </property>
+  <property value="1.5">  aero/constants/volume-m3_2_3 </property>
+  <!-- Added mass constants. -->
+  <property value="0.06"> aero/constants/added-mass/k-axial </property>
+  <property value="0.89"> aero/constants/added-mass/k-transverse </property>
+  <property value="0.69"> aero/constants/added-mass/k-rotational </property>
+  <property value="0.75">  aero/constants/added-mass/tweak-factor </property>
+ 
+ <system file="Systems/airship_added_mass"/>
+
+ <!-- <aerodynamics file="Systems/gerris_aero"/> -->
+ <aerodynamics file="Systems/datcom_aero"/>
+
+
+</aerodynamics>
+

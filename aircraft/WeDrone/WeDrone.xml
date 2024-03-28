@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+
+<fdm_config release="Alpha" version="3.0">
+
+    <metrics file="Metrics.xml"/>  <!-- OK -->
+
+    <mass_balance file="Mass.xml"/>  <!-- OK -->
+
+    <ground_reactions file="Gear.xml"/>  <!-- OK -->
+
+    <propulsion file="Propulsion.xml"/>  <!-- OK -->
+   
+    <aerodynamics file="Aero.xml"/>
+
+   <!--  
+    NOT OK
+    fcs/cmdEscFR_nd
+    fcs/cmdEscAL_nd
+
+    <system file="Effectors.xml"/>   
+    -->
+
+    <flight_control file="FlightControl.xml"/>
+     
+
+
+ <!-- OK 
+    <system file="SensorImu.xml"/>
+    <system file="SensorBaro.xml"/>
+    <system file="SensorGps.xml"/>
+  -->
+  
+</fdm_config>
+
