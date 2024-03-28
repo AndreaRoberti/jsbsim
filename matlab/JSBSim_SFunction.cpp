@@ -562,7 +562,7 @@ static void mdlUpdate(SimStruct *S, int_T tid)
     */
 
     JSBSimInterface* JII = (JSBSimInterface*) ssGetPWork(S)[0];
-
+/*
     InputRealPtrsType ctrlCmdInput = ssGetInputPortRealSignalPtrs(S, 0);
     double* dWorkCtrlCmdIn = (double*) ssGetDWork(S, 0);
     std::vector<double> ctrlVec(inputSize);
@@ -590,7 +590,7 @@ static void mdlUpdate(SimStruct *S, int_T tid)
             return;
         }
     }
-
+*/
     JII->Update();
     
     double *dWorkVector;

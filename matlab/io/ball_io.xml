@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <s_function_config>
     <input>
-        <property> fcs/flap-pos-rad </property>
+        <property> position/h-agl-km </property>
     </input>
     <outputs>
         <output name="State">
-            <property> position/h-agl-ft </property>
+            <property> position/h-agl-km </property>
             <property> fcs/parachute_reef_pos_norm </property>
         </output>
     </outputs>
